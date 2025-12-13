@@ -1,0 +1,4 @@
+project_id = "vrngrmcilpmmzyhjefhq"
+
+[functions.inventory-chat]
+verify_jwt = true

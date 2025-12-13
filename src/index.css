@@ -1,0 +1,338 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Jelt AI Platform - Futuristic Design System */
+
+@layer base {
+  :root {
+    /* AI Platform Background - Mint Fresh */
+    --background: 180 44% 89%; /* Base: #C1E0DF */
+    --background-secondary: 180 35% 92%; /* Lighter variant */
+    --background-glass: 180 44% 96%; /* Glass panels */
+    --foreground: 215 28% 17%;
+
+    /* AI Glass Cards - Depth & Transparency */
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+    --card-glass: 0 0% 100%; /* White background */
+    --card-shadow: 0 8px 32px 0 hsl(174 61% 25% / 0.08);
+    --card-shadow-hover: 0 12px 48px 0 hsl(174 61% 25% / 0.15);
+    --card-border: 180 20% 88%;
+
+    /* Jelt AI Brand Colors */
+    --primary: 174 61% 25%; /* Jelt Green #18695e */
+    --primary-light: 174 61% 40%;
+    --primary-glow: 174 100% 65%; /* AI Glow effect */
+    --primary-foreground: 0 0% 100%;
+    --primary-dark: 174 61% 15%;
+    
+    /* AI Gradients - Fluid & Dynamic */
+    --gradient-ai-primary: linear-gradient(135deg, hsl(174 61% 25%), hsl(174 100% 45%));
+    --gradient-ai-subtle: linear-gradient(180deg, hsl(174 61% 95%), hsl(180 44% 96%));
+    --gradient-ai-glow: radial-gradient(circle at 50% 50%, hsl(174 100% 65% / 0.2), transparent 70%);
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.25), hsl(0 0% 100% / 0.1));
+
+    /* AI Secondary Colors */
+    --secondary: 180 35% 94%;
+    --secondary-foreground: 215 28% 17%;
+    --secondary-hover: 180 35% 88%;
+
+    /* AI Chart Colors - Vibrant */
+    --chart-primary: 174 61% 25%;
+    --chart-forecast: 174 100% 45%; /* Bright AI prediction */
+    --chart-actual: 142 76% 36%; /* Success green */
+    --chart-confidence: 174 61% 55% / 0.2; /* Confidence bands */
+    --chart-grid: 215 20% 90%;
+
+    /* AI Muted Tones */
+    --muted: 180 35% 94%;
+    --muted-foreground: 215 16% 47%;
+    --muted-hover: 180 35% 90%;
+
+    /* AI Accent - Sparks */
+    --accent: 174 100% 65%;
+    --accent-foreground: 0 0% 100%;
+    --accent-glow: 174 100% 65% / 0.3;
+
+    /* AI Status Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-glow: 142 76% 36% / 0.2;
+    
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 100%;
+    --warning-glow: 45 93% 47% / 0.2;
+    
+    --danger: 0 84% 60%;
+    --danger-foreground: 0 0% 100%;
+    --danger-glow: 0 84% 60% / 0.2;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* AI UI Elements */
+    --border: 180 20% 88%;
+    --border-light: 180 20% 93%;
+    --input: 0 0% 100%;
+    --input-border: 180 20% 85%;
+    --input-focus: 174 61% 25%;
+    --ring: 174 61% 25%;
+
+    /* Professional Spacing & Borders */
+    --radius: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+/* AI Platform Utility Classes */
+@layer components {
+  /* AI Background Patterns */
+  .ai-background {
+    background: 
+      radial-gradient(circle at 20% 30%, hsl(174 100% 65% / 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, hsl(174 100% 65% / 0.06) 0%, transparent 50%),
+      hsl(var(--background));
+  }
+
+  /* AI Glass Card */
+  .card-ai-glass {
+    @apply relative overflow-hidden rounded-2xl border border-[hsl(var(--card-border))] 
+           bg-white shadow-[var(--card-shadow)]
+           transition-all duration-300 hover:shadow-[var(--card-shadow-hover)];
+  }
+
+  /* Enterprise Card */
+  .card-enterprise-lg {
+    @apply relative overflow-hidden rounded-2xl border border-[hsl(var(--card-border))] 
+           bg-white shadow-[var(--card-shadow)]
+           transition-all duration-300 hover:shadow-[var(--card-shadow-hover)];
+  }
+
+  /* AI Panel with Glow */
+  .ai-panel {
+    @apply card-ai-glass relative;
+  }
+  
+  .ai-panel-glow {
+    @apply absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-500;
+    background: var(--gradient-ai-glow);
+  }
+  
+  .ai-panel:hover .ai-panel-glow {
+    @apply opacity-100;
+  }
+
+  /* AI Gradients */
+  .bg-gradient-ai {
+    background: var(--gradient-ai-primary);
+  }
+  
+  .bg-gradient-ai-subtle {
+    background: var(--gradient-ai-subtle);
+  }
+
+  /* AI Spark Indicator */
+  .ai-spark {
+    @apply relative inline-flex h-3 w-3;
+  }
+  
+  .ai-spark::before {
+    @apply absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--accent))];
+    content: '';
+    animation: ai-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .ai-spark::after {
+    @apply relative inline-flex h-3 w-3 rounded-full bg-[hsl(var(--accent))];
+    content: '';
+  }
+
+  /* AI Status Badges */
+  .badge-ai-success {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
+           bg-[hsl(var(--success-glow))] text-[hsl(var(--success))] 
+           border border-[hsl(var(--success))]/20;
+  }
+  
+  .badge-ai-warning {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
+           bg-[hsl(var(--warning-glow))] text-[hsl(var(--warning))] 
+           border border-[hsl(var(--warning))]/20;
+  }
+  
+  .badge-ai-danger {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
+           bg-[hsl(var(--danger-glow))] text-[hsl(var(--danger))] 
+           border border-[hsl(var(--danger))]/20;
+  }
+
+  /* AI Interactive Elements */
+  .ai-hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[var(--card-shadow-hover)];
+  }
+  
+  .ai-hover-glow {
+    @apply relative transition-all duration-300;
+  }
+  
+  .ai-hover-glow::after {
+    content: '';
+    @apply absolute -inset-1 rounded-2xl opacity-0 transition-opacity duration-300 blur-xl;
+    background: hsl(var(--accent-glow));
+    z-index: -1;
+  }
+  
+  .ai-hover-glow:hover::after {
+    @apply opacity-100;
+  }
+
+  /* AI Shimmer Loading */
+  .ai-shimmer {
+    @apply relative overflow-hidden;
+  }
+  
+  .ai-shimmer::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(0 0% 100% / 0.3) 50%,
+      transparent 100%
+    );
+    animation: shimmer 2s infinite;
+  }
+
+  /* Chart Colors */
+  .chart-line-forecast {
+    stroke: hsl(var(--chart-primary));
+    stroke-width: 2;
+    fill: none;
+  }
+  
+  .chart-line-actual {
+    stroke: hsl(var(--chart-gray));
+    stroke-width: 2;
+    stroke-dasharray: 5,5;
+    fill: none;
+  }
+
+  /* Data Table Enhancements */
+  .table-enterprise {
+    @apply w-full text-sm;
+  }
+  
+  .table-enterprise th {
+    @apply border-b border-border bg-muted/50 px-4 py-3 text-left font-medium text-muted-foreground;
+  }
+  
+  .table-enterprise td {
+    @apply border-b border-border px-4 py-3 text-card-foreground;
+  }
+  
+  .table-enterprise tr:hover {
+    @apply bg-muted/30;
+  }
+
+  /* Form Elements */
+  .input-enterprise {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground ai-background;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+}
+
+/* AI Animations */
+@keyframes ai-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
