@@ -11,6 +11,10 @@ import { AlertsList } from "@/components/dashboard/AlertsList";
 import { SupplierPerformance } from "@/components/dashboard/SupplierPerformance";
 import { AIInsightsFeed } from "@/components/dashboard/AIInsightsFeed";
 import { AIAssistantCard } from "@/components/dashboard/AIAssistantCard";
+import { SalesHistoryTable } from "@/components/dashboard/SalesHistoryTable";
+import { MovementsHistoryTable } from "@/components/dashboard/MovementsHistoryTable";
+import { ReplenishmentTable } from "@/components/dashboard/ReplenishmentTable";
+import { ReplenishmentMetrics } from "@/components/dashboard/ReplenishmentMetrics";
 import { Loader2 } from "lucide-react";
 import { FilterProvider } from "@/contexts/FilterContext";
 
@@ -47,7 +51,7 @@ export default function DashboardPage() {
         {/* AI KPI Panels */}
         <KPICards />
         
-        {/* Main AI Dashboard Grid */}
+        {/* Main Dashboard Grid */}
         <div className="max-w-[1600px] mx-auto px-6 pb-6">
           {/* Top Section - AI Prediction (wider) & Jenny AI (narrower) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -57,6 +61,21 @@ export default function DashboardPage() {
             <AIAssistantCard />
           </div>
 
+          {/* Replenishment Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <ReplenishmentMetrics />
+            <ReplenishmentTable />
+          </div>
+
+          {/* History Tables */}
+          <div className="grid grid-cols-1 gap-6 mb-6">
+            <SalesHistoryTable />
+            <MovementsHistoryTable />
+          </div>
+        </div>
+
+        {/* Mock Components Section */}
+        <div className="max-w-[1600px] mx-auto px-6 pb-6">
           {/* Full Width AI Insights Feed */}
           <div className="mb-6">
             <AIInsightsFeed />

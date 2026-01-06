@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown, Package, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/api-client";
 import { useFilters } from "@/contexts/FilterContext";
 
 interface KPIData {
@@ -18,73 +18,116 @@ export function KPICards() {
   useEffect(() => {
     async function fetchKPIData() {
       try {
-        // Get current month inventory data
-        const currentMonth = new Date().getMonth() + 1;
-        const currentYear = new Date().getFullYear();
-        
-        // Calculate month range from date range
-        const startMonth = appliedFilters.dateRange.start.getMonth() + 1;
-        const endMonth = appliedFilters.dateRange.end.getMonth() + 1;
+        // Get date range from filters
+        const fromDate = appliedFilters.dateRange.start.toISOString();
+        const toDate = appliedFilters.dateRange.end.toISOString();
 
-        let query = supabase
-          .from('monthly_inventory')
-          .select('quantity, sales, forecast, product_id, products!inner(category, name, sku, site)')
-          .eq('year', currentYear)
-          .gte('month', startMonth)
-          .lte('month', endMonth);
+        // Get sales summary for the date range
+        const salesSummary = await apiClient.getSalesSummary({
+          from: fromDate,
+          to: toDate,
+        });
 
-        // Apply site filter
-        if (appliedFilters.site !== "all") {
-          const siteMap: { [key: string]: string } = {
-            main: "Clínica Principal",
-            north: "Sucursal Norte",
-            west: "Sucursal Oeste",
-          };
-          query = query.eq('products.site', siteMap[appliedFilters.site]);
+        console.log('Sales Summary:', salesSummary);
+
+        // Get all articles to calculate total stock (with pagination if needed)
+        let allArticles: any[] = [];
+        let page = 1;
+        const perPage = 100; // Reasonable page size
+        let hasMore = true;
+
+        while (hasMore) {
+          const articlesRes = await apiClient.listArticles({ 
+            page,
+            perPage, 
+            isActive: true 
+          });
+          
+          allArticles = [...allArticles, ...articlesRes.data.items];
+          hasMore = articlesRes.data.meta.currentPage < articlesRes.data.meta.totalPages;
+          page++;
         }
-
-        const { data: inventoryData, error } = await query;
-
-        if (error) throw error;
-
-        // Apply search filter
-        let filteredData = inventoryData || [];
-        if (appliedFilters.search) {
-          const searchLower = appliedFilters.search.toLowerCase();
-          filteredData = filteredData.filter((item: any) => 
-            item.products.sku.toLowerCase().includes(searchLower) || 
-            item.products.name.toLowerCase().includes(searchLower)
-          );
+        
+        console.log('Articles loaded:', allArticles.length);
+        
+        const totalStock = allArticles.reduce((sum, article) => sum + (article.stock || 0), 0);
+        
+        // Calculate average coverage based on sales summary
+        // Calculate days in range from date filters or from first/last sale
+        let daysInRange = 30; // Default
+        if (salesSummary.first_sale_at && salesSummary.last_sale_at) {
+          const firstDate = new Date(salesSummary.first_sale_at);
+          const lastDate = new Date(salesSummary.last_sale_at);
+          daysInRange = Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+        } else {
+          // Use the date range from filters
+          const startDate = new Date(fromDate);
+          const endDate = new Date(toDate);
+          daysInRange = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
         }
+        
+        // Ensure at least 1 day to avoid division by zero
+        daysInRange = Math.max(daysInRange, 1);
+        
+        const avgDailyQuantity = salesSummary.units_sold && daysInRange > 0 
+          ? salesSummary.units_sold / daysInRange 
+          : 0;
+        
+        const averageCoverage = avgDailyQuantity > 0 
+          ? Math.round(totalStock / avgDailyQuantity) 
+          : 999;
 
-        // Calculate KPIs
-        const totalStock = filteredData.reduce((sum, item) => sum + item.quantity, 0);
-        const projectedDemand = filteredData.reduce((sum, item) => sum + item.forecast, 0);
-        
-        // Calculate average coverage (stock / daily demand)
-        const totalDemand = filteredData.reduce((sum, item) => sum + item.sales, 0) || 1;
-        const averageCoverage = Math.round((totalStock / totalDemand) * 30);
-        
-        // Count products with low coverage (less than 15 days)
-        const atRiskCount = filteredData.filter(item => {
-          const coverage = item.sales > 0 ? (item.quantity / item.sales) * 30 : 999;
-          return coverage < 15;
+        // Get articles with low stock (using reorder_point as threshold)
+        const atRiskCount = allArticles.filter(article => {
+          if (!article.reorder_point) return false;
+          return (article.stock || 0) <= article.reorder_point;
         }).length;
 
-        setKpiData({
+        // Projected demand for 30 days based on average daily quantity
+        const projectedDemand = Math.round(avgDailyQuantity * 30);
+
+        const kpiDataResult = {
           totalStock,
           projectedDemand,
           averageCoverage,
           atRiskCount
-        });
-      } catch (error) {
+        };
+
+        console.log('KPI Data calculated:', kpiDataResult);
+        setKpiData(kpiDataResult);
+      } catch (error: any) {
         console.error('Error fetching KPI data:', error);
+        console.error('Error details:', {
+          message: error?.message,
+          stack: error?.stack,
+          response: error?.response
+        });
+        // Set default values on error
+        setKpiData({
+          totalStock: 0,
+          projectedDemand: 0,
+          averageCoverage: 0,
+          atRiskCount: 0
+        });
       } finally {
         setLoading(false);
+        console.log('KPI loading finished, loading state:', false);
       }
     }
 
     fetchKPIData();
+
+    // Listen for sale and movement events to refresh
+    const handleSaleCreated = () => fetchKPIData();
+    const handleMovementCreated = () => fetchKPIData();
+    
+    window.addEventListener('sale:created', handleSaleCreated);
+    window.addEventListener('movement:created', handleMovementCreated);
+    
+    return () => {
+      window.removeEventListener('sale:created', handleSaleCreated);
+      window.removeEventListener('movement:created', handleMovementCreated);
+    };
   }, [appliedFilters]);
 
   const kpiCards = [

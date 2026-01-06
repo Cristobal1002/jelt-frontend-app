@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/api-client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useFilters } from "@/contexts/FilterContext";
 
@@ -19,68 +19,99 @@ export function ForecastChart() {
   useEffect(() => {
     async function fetchForecastData() {
       try {
-        const currentYear = 2025;
-        
-        // Calculate month range from date range
-        const startMonth = appliedFilters.dateRange.start.getMonth() + 1;
-        const endMonth = appliedFilters.dateRange.end.getMonth() + 1;
-        
-        let query = supabase
-          .from('monthly_inventory')
-          .select('month, sales, forecast, products!inner(category, name, sku, site)')
-          .eq('year', currentYear)
-          .gte('month', startMonth)
-          .lte('month', endMonth)
-          .order('month');
+        // Get date range from filters
+        const fromDate = appliedFilters.dateRange.start.toISOString();
+        const toDate = appliedFilters.dateRange.end.toISOString();
 
-        // Apply site filter
-        if (appliedFilters.site !== "all") {
-          const siteMap: { [key: string]: string } = {
-            main: "Clínica Principal",
-            north: "Sucursal Norte",
-            west: "Sucursal Oeste",
-          };
-          query = query.eq('products.site', siteMap[appliedFilters.site]);
+        // Fetch sales history with pagination (max limit is 500)
+        let allSales: any[] = [];
+        let offset = 0;
+        const limit = 500; // Max allowed by backend
+        let hasMore = true;
+
+        while (hasMore) {
+          const salesResponse = await apiClient.listSales({
+            from: fromDate,
+            to: toDate,
+            limit,
+            offset,
+          });
+
+          console.log('Sales response:', salesResponse);
+          allSales = [...allSales, ...salesResponse.rows];
+          hasMore = salesResponse.offset + salesResponse.limit < salesResponse.count;
+          offset += limit;
+          
+          // Safety break to avoid infinite loops
+          if (offset > 10000) break;
         }
 
-        const { data, error } = await query;
+        console.log('Total sales loaded:', allSales.length);
+        const sales = allSales;
 
-        if (error) throw error;
-
-        // Apply search filter
-        let filteredData = data || [];
-        if (appliedFilters.search) {
-          const searchLower = appliedFilters.search.toLowerCase();
-          filteredData = filteredData.filter((item: any) => 
-            item.products.sku.toLowerCase().includes(searchLower) || 
-            item.products.name.toLowerCase().includes(searchLower)
-          );
-        }
-
-        const monthlyTotals = filteredData.reduce((acc: any, item: any) => {
-          const monthName = new Date(2025, item.month - 1).toLocaleDateString('es-CO', { month: 'short' });
-          if (!acc[item.month]) {
-            acc[item.month] = {
+        // Group sales by month
+        const monthlyTotals: { [key: string]: { month: string; actual: number; forecast: number } } = {};
+        
+        sales.forEach((sale) => {
+          const saleDate = new Date(sale.sold_at);
+          const monthKey = `${saleDate.getFullYear()}-${String(saleDate.getMonth() + 1).padStart(2, '0')}`;
+          const monthName = saleDate.toLocaleDateString('es-CO', { month: 'short', year: 'numeric' });
+          
+          if (!monthlyTotals[monthKey]) {
+            monthlyTotals[monthKey] = {
               month: monthName,
               actual: 0,
-              forecast: 0
+              forecast: 0, // Forecast would come from replenishment API if available
             };
           }
-          acc[item.month].actual += item.sales;
-          acc[item.month].forecast += item.forecast;
-          return acc;
-        }, {});
+          
+          monthlyTotals[monthKey].actual += sale.quantity;
+        });
 
-        const chartData = Object.values(monthlyTotals || {}) as MonthlyData[];
+        // Try to get forecast data from replenishment API if available
+        // For now, we'll calculate a simple forecast based on average
+        const months = Object.keys(monthlyTotals).sort();
+        if (months.length > 0) {
+          // Calculate average monthly sales for forecast
+          const totalActual = Object.values(monthlyTotals).reduce((sum, m) => sum + m.actual, 0);
+          const avgMonthly = totalActual / months.length;
+          
+          // Add forecast as 10% increase from average (placeholder - should use actual forecast API)
+          Object.keys(monthlyTotals).forEach((key) => {
+            monthlyTotals[key].forecast = Math.round(avgMonthly * 1.1);
+          });
+        }
+
+        const chartData = Object.values(monthlyTotals).sort((a, b) => {
+          // Sort by month name (simple string comparison works for same year)
+          return a.month.localeCompare(b.month);
+        }) as MonthlyData[];
+
+        console.log('Chart data set:', chartData);
         setChartData(chartData);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching forecast data:', error);
+        console.error('Error details:', {
+          message: error?.message,
+          stack: error?.stack,
+          response: error?.response
+        });
+        setChartData([]);
       } finally {
         setLoading(false);
+        console.log('Forecast loading finished');
       }
     }
 
     fetchForecastData();
+
+    // Listen for sale events to refresh
+    const handleSaleCreated = () => fetchForecastData();
+    window.addEventListener('sale:created', handleSaleCreated);
+    
+    return () => {
+      window.removeEventListener('sale:created', handleSaleCreated);
+    };
   }, [appliedFilters]);
 
   return (

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Plus, ChevronRight, LogOut, Package, PackagePlus } from "lucide-react";
+import { FileText, Download, Plus, ChevronRight, LogOut, Package, PackagePlus, ShoppingCart, ArrowUpDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +7,8 @@ import { useFilters } from "@/contexts/FilterContext";
 import { useState } from "react";
 import { CreatePurchaseOrderDialog } from "./CreatePurchaseOrderDialog";
 import { AddProductDialog } from "./AddProductDialog";
+import { CreateSaleDialog } from "./CreateSaleDialog";
+import { CreateMovementDialog } from "./CreateMovementDialog";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -15,6 +17,8 @@ export function DashboardHeader() {
   const { appliedFilters } = useFilters();
   const [showPODialog, setShowPODialog] = useState(false);
   const [showAddProductDialog, setShowAddProductDialog] = useState(false);
+  const [showSaleDialog, setShowSaleDialog] = useState(false);
+  const [showMovementDialog, setShowMovementDialog] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -237,6 +241,16 @@ export function DashboardHeader() {
       <AddProductDialog 
         open={showAddProductDialog} 
         onOpenChange={setShowAddProductDialog} 
+      />
+
+      <CreateSaleDialog
+        open={showSaleDialog}
+        onOpenChange={setShowSaleDialog}
+      />
+
+      <CreateMovementDialog
+        open={showMovementDialog}
+        onOpenChange={setShowMovementDialog}
       />
     </>
   );

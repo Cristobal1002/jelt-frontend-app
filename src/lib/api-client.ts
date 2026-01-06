@@ -197,6 +197,136 @@ export interface ListStockroomsResponse {
   meta: PaginationMeta;
 }
 
+// Inventory History types - Sales
+export interface SalesHistoryCreate {
+  id_article: string;
+  id_stockroom: string;
+  quantity: number;
+  sold_at: string; // ISO date-time
+  unit_price?: number | null;
+  metadata?: Record<string, any> | null;
+}
+
+export interface SalesHistory extends SalesHistoryCreate {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListSalesParams {
+  articleId?: string;
+  stockroomId?: string;
+  from?: string; // ISO date-time
+  to?: string; // ISO date-time
+  limit?: number;
+  offset?: number;
+}
+
+export interface ListSalesResponse {
+  rows: SalesHistory[];
+  count: number;
+  limit: number;
+  offset: number;
+}
+
+export interface SalesSummary {
+  transactions: number;
+  units_sold: number;
+  first_sale_at: string | null;
+  last_sale_at: string | null;
+  window_days?: number;
+  avg_daily_units?: number;
+}
+
+export interface TopSellingArticleItem {
+  id_article: string;
+  total_quantity: number;
+  article?: {
+    id: string;
+    sku: string;
+    name: string;
+  } | null;
+}
+
+export interface TopSellingResponse {
+  days: number;
+  limit: number;
+  data: TopSellingArticleItem[];
+}
+
+// Inventory History types - Movements
+export type StockMovementType = 'IN' | 'OUT' | 'ADJUSTMENT';
+
+export interface StockMovementCreate {
+  id_article: string;
+  id_stockroom: string;
+  type: StockMovementType;
+  quantity: number;
+  moved_at: string; // ISO date-time
+  reference?: string | null;
+  metadata?: Record<string, any> | null;
+}
+
+export interface StockMovement extends StockMovementCreate {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListMovementsParams {
+  articleId?: string;
+  stockroomId?: string;
+  type?: StockMovementType;
+  from?: string; // ISO date-time
+  to?: string; // ISO date-time
+  limit?: number;
+  offset?: number;
+}
+
+export interface ListMovementsResponse {
+  rows: StockMovement[];
+  count: number;
+  limit: number;
+  offset: number;
+}
+
+export interface StockMovementSummary {
+  article_id?: string | null;
+  stockroom_id?: string | null;
+  from?: string | null;
+  to?: string | null;
+  totals: {
+    IN: number;
+    OUT: number;
+    ADJUSTMENT: number;
+  };
+}
+
+// Replenishment types
+export interface ReplenishmentMetrics {
+  stock_actual: number;
+  demanda_promedio_diaria: number;
+  desviacion_demanda_diaria: number;
+  lead_time_dias: number;
+  nivel_servicio: number;
+  z_score: number;
+  demanda_esperada_en_lead_time: number;
+  desviacion_en_lead_time: number;
+  stock_seguridad: number;
+  reorder_point_actual: number | null;
+  reorder_point_recomendado: number;
+  cantidad_reorden_sugerida: number;
+}
+
+export interface ReplenishmentResponse {
+  article: {
+    id: string;
+    sku: string;
+    name: string;
+  };
+  metrics: ReplenishmentMetrics;
+}
+
 class ApiClient {
   private baseURL: string;
   private token: string | null = null;
@@ -466,6 +596,102 @@ class ApiClient {
 
   async updateStockroom(id: string, data: Partial<CreateStockroomData & { isActive?: boolean }>): Promise<ApiResponse<Stockroom>> {
     return this.put<ApiResponse<Stockroom>>(`/stockroom/${id}`, data);
+  }
+
+  // Assistant endpoints
+  async chatAssistant(message: string): Promise<ApiResponse<{ reply: string; usedTools: string[] }>> {
+    return this.post<ApiResponse<{ reply: string; usedTools: string[] }>>('/assistant/chat', {
+      message,
+    });
+  }
+
+  // Inventory History - Sales endpoints
+  async createSale(data: SalesHistoryCreate): Promise<SalesHistory> {
+    return this.post<SalesHistory>('/inventory-history/sales', data);
+  }
+
+  async listSales(params?: ListSalesParams): Promise<ListSalesResponse> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    const endpoint = `/inventory-history/sales${queryString ? `?${queryString}` : ''}`;
+    return this.get<ListSalesResponse>(endpoint);
+  }
+
+  async getSalesSummary(params?: Omit<ListSalesParams, 'limit' | 'offset'>): Promise<SalesSummary> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    const endpoint = `/inventory-history/sales/summary${queryString ? `?${queryString}` : ''}`;
+    return this.get<SalesSummary>(endpoint);
+  }
+
+  async getTopSellingArticles(params?: { stockroomId?: string; days?: number; limit?: number }): Promise<TopSellingResponse> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    const endpoint = `/inventory-history/sales/top${queryString ? `?${queryString}` : ''}`;
+    return this.get<TopSellingResponse>(endpoint);
+  }
+
+  // Inventory History - Movements endpoints
+  async createMovement(data: StockMovementCreate): Promise<StockMovement> {
+    return this.post<StockMovement>('/inventory-history/movements', data);
+  }
+
+  async listMovements(params?: ListMovementsParams): Promise<ListMovementsResponse> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    const endpoint = `/inventory-history/movements${queryString ? `?${queryString}` : ''}`;
+    return this.get<ListMovementsResponse>(endpoint);
+  }
+
+  async getMovementSummary(params?: Omit<ListMovementsParams, 'limit' | 'offset' | 'type'>): Promise<StockMovementSummary> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    const endpoint = `/inventory-history/movements/summary${queryString ? `?${queryString}` : ''}`;
+    return this.get<StockMovementSummary>(endpoint);
+  }
+
+  // Replenishment endpoints
+  async getReplenishmentByArticleId(articleId: string): Promise<ApiResponse<ReplenishmentResponse>> {
+    return this.get<ApiResponse<ReplenishmentResponse>>(`/replenishment/articles/${articleId}`);
+  }
+
+  async getReplenishmentBySku(sku: string): Promise<ApiResponse<ReplenishmentResponse>> {
+    return this.get<ApiResponse<ReplenishmentResponse>>(`/replenishment/articles/by-sku/${sku}`);
   }
 }
 

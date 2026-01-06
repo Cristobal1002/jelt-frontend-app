@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sparkles, Send, Package, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { CreatePurchaseOrderDialog } from "./CreatePurchaseOrderDialog";
 
@@ -57,20 +57,22 @@ export function InventoryChat() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("inventory-chat", {
-        body: {
-          message: input,
-          conversationHistory: messages,
-        },
-      });
+      const response = await apiClient.chatAssistant(input);
+      const { reply, usedTools } = response.data;
 
-      if (error) throw error;
+      // Detectar si la respuesta sugiere crear una orden de compra
+      const shouldShowCreateOrder = 
+        reply.toLowerCase().includes('reorden') ||
+        reply.toLowerCase().includes('orden de compra') ||
+        reply.toLowerCase().includes('purchase order') ||
+        usedTools.includes('get_low_stock_articles') ||
+        usedTools.includes('suggest_reorder_quantity');
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: data.response,
-        showCreateOrder: data.shouldCreatePO && data.alertsCount > 0,
+        content: reply,
+        showCreateOrder: shouldShowCreateOrder,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
