@@ -27,6 +27,17 @@ export function ReplenishmentTable() {
 
   useEffect(() => {
     loadArticles();
+
+    // Listen for article creation events
+    const handleArticleCreated = () => {
+      loadArticles();
+    };
+
+    window.addEventListener('article:created', handleArticleCreated);
+
+    return () => {
+      window.removeEventListener('article:created', handleArticleCreated);
+    };
   }, []);
 
   const loadArticles = async () => {

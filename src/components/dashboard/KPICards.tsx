@@ -117,16 +117,19 @@ export function KPICards() {
 
     fetchKPIData();
 
-    // Listen for sale and movement events to refresh
+    // Listen for sale, movement, and article events to refresh
     const handleSaleCreated = () => fetchKPIData();
     const handleMovementCreated = () => fetchKPIData();
+    const handleArticleCreated = () => fetchKPIData();
     
     window.addEventListener('sale:created', handleSaleCreated);
     window.addEventListener('movement:created', handleMovementCreated);
+    window.addEventListener('article:created', handleArticleCreated);
     
     return () => {
       window.removeEventListener('sale:created', handleSaleCreated);
       window.removeEventListener('movement:created', handleMovementCreated);
+      window.removeEventListener('article:created', handleArticleCreated);
     };
   }, [appliedFilters]);
 

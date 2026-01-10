@@ -63,6 +63,21 @@ export function CreateMovementDialog({
     }
   }, [open, articleId, movementType]);
 
+  // Listen for article creation events to refresh options
+  useEffect(() => {
+    const handleArticleCreated = () => {
+      if (open) {
+        loadOptions();
+      }
+    };
+
+    window.addEventListener('article:created', handleArticleCreated);
+
+    return () => {
+      window.removeEventListener('article:created', handleArticleCreated);
+    };
+  }, [open]);
+
   const loadOptions = async () => {
     setLoadingOptions(true);
     try {
