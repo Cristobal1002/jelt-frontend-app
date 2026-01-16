@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient } from "@/lib/api-client";
 import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, TrendingUp, Zap, Brain, User } from "lucide-react";
 
 export default function AuthPage() {
@@ -16,6 +18,10 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoverySent, setRecoverySent] = useState(false);
 
   useEffect(() => {
     // Redirect if already authenticated
@@ -99,7 +105,7 @@ export default function AuthPage() {
       <div className="flex-1 flex items-center justify-center p-8 relative z-10">
         <div className="w-full max-w-md">
           {/* Main Card */}
-          <div className="card-ai-glass p-8 space-y-8 ai-hover-lift">
+          <div className="card-ai-glass p-8 space-y-8">
             <div className="ai-panel-glow" />
             
             {/* Logo & Brand */}
@@ -201,10 +207,8 @@ export default function AuthPage() {
                     type="button"
                     className="text-sm text-[hsl(var(--primary))] hover:text-[hsl(var(--primary-light))] transition-colors font-medium"
                     onClick={() => {
-                      toast({
-                        title: "Password Recovery",
-                        description: "This feature will be available soon.",
-                      });
+                      setShowRecoveryDialog(true);
+                      setRecoveryEmail(email); // Pre-fill with current email if any
                     }}
                   >
                     Forgot your password?
@@ -215,7 +219,7 @@ export default function AuthPage() {
               {/* Submit Button */}
               <Button 
                 type="submit" 
-                className="w-full h-12 text-base font-medium bg-gradient-ai text-white hover:opacity-90 shadow-lg ai-hover-glow" 
+                className="w-full h-12 text-base font-medium bg-gradient-ai text-white hover:opacity-90 shadow-lg" 
                 disabled={loading}
               >
                 {loading ? (
@@ -342,6 +346,125 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+
+      {/* Password Recovery Dialog */}
+      <Dialog open={showRecoveryDialog} onOpenChange={setShowRecoveryDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Recover Password</DialogTitle>
+            <DialogDescription>
+              {recoverySent
+                ? "If the email exists, a temporary code has been sent to your inbox. Use this code as your password to log in."
+                : "Enter your email address and we'll send you a temporary code to reset your password."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!recoverySent ? (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!recoveryEmail.trim()) {
+                  toast({
+                    title: "Email required",
+                    description: "Please enter your email address.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
+                setRecoveryLoading(true);
+                try {
+                  await apiClient.requestRecovery(recoveryEmail.trim());
+                  setRecoverySent(true);
+                  toast({
+                    title: "Recovery code sent",
+                    description: "Check your email for a temporary code. Use it as your password to log in.",
+                  });
+                } catch (error: any) {
+                  toast({
+                    title: "Error",
+                    description: error.message || "Failed to send recovery code. Please try again.",
+                    variant: "destructive",
+                  });
+                } finally {
+                  setRecoveryLoading(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <label htmlFor="recovery-email" className="text-sm font-medium">
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="recovery-email"
+                    type="email"
+                    placeholder="you@email.com"
+                    value={recoveryEmail}
+                    onChange={(e) => setRecoveryEmail(e.target.value)}
+                    required
+                    disabled={recoveryLoading}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowRecoveryDialog(false);
+                    setRecoveryEmail("");
+                    setRecoverySent(false);
+                  }}
+                  disabled={recoveryLoading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={recoveryLoading}>
+                  {recoveryLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Recovery Code"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-muted">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Next steps:</strong>
+                </p>
+                <ol className="mt-2 text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>Check your email for the temporary code</li>
+                  <li>Return to the login form</li>
+                  <li>Use the code as your password</li>
+                </ol>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  onClick={() => {
+                    setShowRecoveryDialog(false);
+                    setRecoveryEmail("");
+                    setRecoverySent(false);
+                    setEmail(recoveryEmail); // Pre-fill email in login form
+                  }}
+                >
+                  Got it
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

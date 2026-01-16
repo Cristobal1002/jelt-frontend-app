@@ -459,6 +459,32 @@ class ApiClient {
     return response.data.user;
   }
 
+  // Password recovery endpoints
+  async requestRecovery(email: string): Promise<{ sent: boolean }> {
+    const response = await this.request<ApiResponse<{ sent: boolean }>>('/auth/recover', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    return response.data;
+  }
+
+  async loginWithTempCode(email: string, code: string): Promise<LoginResponse> {
+    const response = await this.request<ApiResponse<LoginResponse>>('/auth/login-temp', {
+      method: 'POST',
+      body: JSON.stringify({ email, password: code }),
+    });
+    
+    // Extract data from response
+    const loginData = response.data;
+    
+    // Store token
+    if (loginData.token) {
+      this.setToken(loginData.token);
+    }
+    
+    return loginData;
+  }
+
   // Health check
   async healthCheck(): Promise<{ status: string }> {
     const response = await this.request<ApiResponse<{ status: string }>>('/health', {
