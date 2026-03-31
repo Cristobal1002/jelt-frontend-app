@@ -13,9 +13,24 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: [
+          '"Nunito Sans"',
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
+        /** Borde real de campos (no confundir con `input`, que es el relleno) */
+        "input-border": "hsl(var(--input-border))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/api-client";
 import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, TrendingUp, Zap, Brain, User } from "lucide-react";
+import { JeltLogo } from "@/components/branding/JeltLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -94,6 +96,9 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex relative overflow-hidden ai-background">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-[hsl(var(--primary))] opacity-10 rounded-full blur-3xl animate-float" />
@@ -111,16 +116,11 @@ export default function AuthPage() {
             {/* Logo & Brand */}
             <div className="text-center space-y-4 relative z-10">
               <div className="flex justify-center mb-6">
-                <div className="relative">
-                  <div className="h-20 w-20 rounded-2xl bg-gradient-ai flex items-center justify-center shadow-2xl">
-                    <Sparkles className="h-10 w-10 text-white" />
-                  </div>
-                  <span className="ai-spark absolute -top-2 -right-2" />
-                </div>
+                <JeltLogo className="h-16 sm:h-20 max-h-20 w-auto max-w-[220px] mx-auto" />
               </div>
               
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-ai bg-clip-text text-transparent mb-2">
+                <h1 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-2">
                   Jelt Inventory
                 </h1>
                 <p className="text-sm text-muted-foreground">

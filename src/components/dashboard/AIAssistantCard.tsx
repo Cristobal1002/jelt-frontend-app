@@ -82,7 +82,7 @@ export function AIAssistantCard() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="text-lg font-bold text-card-foreground">Jenny · AI</h3>
-                  <Sparkles className="w-4 h-4 text-[hsl(var(--accent))] animate-pulse" />
+                  <Sparkles className="w-4 h-4 text-[hsl(var(--chart-secondary))] animate-pulse" />
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Medical management and real-time predictions

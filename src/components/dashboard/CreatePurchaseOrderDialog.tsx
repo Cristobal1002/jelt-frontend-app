@@ -303,7 +303,7 @@ export function CreatePurchaseOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-950">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />

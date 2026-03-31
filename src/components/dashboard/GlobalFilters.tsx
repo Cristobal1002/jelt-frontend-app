@@ -98,9 +98,11 @@ export function GlobalFilters() {
             </div>
           </div>
           
-          <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-muted/50">
-            <label className="text-sm text-muted-foreground">Alerts Only</label>
-            <Switch checked={showAlertsOnly} onCheckedChange={setShowAlertsOnly} />
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-input-border bg-muted/60">
+            <label htmlFor="alerts-only" className="text-sm font-medium text-foreground whitespace-nowrap">
+              Alerts Only
+            </label>
+            <Switch id="alerts-only" checked={showAlertsOnly} onCheckedChange={setShowAlertsOnly} />
           </div>
           
           <div className="flex gap-2">

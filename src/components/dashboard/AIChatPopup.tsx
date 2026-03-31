@@ -170,7 +170,7 @@ export function AIChatPopup({ open, onOpenChange }: AIChatPopupProps) {
                     <Button
                       onClick={handleCreateOrder}
                       size="sm"
-                      className="mt-3 w-full bg-white text-[hsl(var(--primary))] hover:bg-white/90"
+                      className="mt-3 w-full bg-background text-[hsl(var(--primary))] hover:bg-muted"
                     >
                       <Package className="w-4 h-4 mr-2" />
                       Create Purchase Order
@@ -225,7 +225,7 @@ export function AIChatPopup({ open, onOpenChange }: AIChatPopupProps) {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about inventory, forecasts, suppliers, or orders..."
                 disabled={loading}
-                className="flex-1 border-[hsl(var(--input-border))] focus:border-[hsl(var(--primary))] bg-white"
+                className="flex-1 border-[hsl(var(--input-border))] focus:border-[hsl(var(--primary))] bg-background"
                 autoFocus
               />
               <Button 
