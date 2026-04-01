@@ -9,6 +9,14 @@ import { apiClient } from "@/lib/api-client";
 import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, TrendingUp, Zap, Brain, User } from "lucide-react";
 import { JeltLogo } from "@/components/branding/JeltLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { cn } from "@/lib/utils";
+
+/** Contenedor de input + iconos: evita translate-y en SVG (borroso) y backdrop-blur en el campo */
+const authInputShell =
+  "flex h-12 w-full items-center gap-3 rounded-md border border-[hsl(var(--input-border))] bg-background px-3 shadow-sm transition-colors focus-within:border-[hsl(var(--primary))] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background";
+
+const authInputField =
+  "h-12 min-h-12 flex-1 min-w-0 border-0 bg-transparent px-0 py-0 text-base shadow-none placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -143,8 +151,8 @@ export default function AuthPage() {
               {isSignUp && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-card-foreground">Name</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                  <div className={authInputShell}>
+                    <User className="h-5 w-5 shrink-0 text-muted-foreground pointer-events-none" strokeWidth={2} aria-hidden />
                     <Input
                       type="text"
                       placeholder="Your name"
@@ -152,7 +160,7 @@ export default function AuthPage() {
                       onChange={(e) => setName(e.target.value)}
                       required
                       disabled={loading}
-                      className="pl-12 h-12 border-[hsl(var(--input-border))] focus:border-[hsl(var(--primary))] bg-background/50 backdrop-blur-sm"
+                      className={authInputField}
                     />
                   </div>
                 </div>
@@ -161,8 +169,8 @@ export default function AuthPage() {
               {/* Email Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-card-foreground">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                <div className={authInputShell}>
+                  <Mail className="h-5 w-5 shrink-0 text-muted-foreground pointer-events-none" strokeWidth={2} aria-hidden />
                   <Input
                     type="email"
                     placeholder="you@email.com"
@@ -170,7 +178,7 @@ export default function AuthPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={loading}
-                    className="pl-12 h-12 border-[hsl(var(--input-border))] focus:border-[hsl(var(--primary))] bg-background/50 backdrop-blur-sm"
+                    className={authInputField}
                   />
                 </div>
               </div>
@@ -178,8 +186,8 @@ export default function AuthPage() {
               {/* Password Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-card-foreground">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                <div className={cn(authInputShell, "gap-2 pr-1")}>
+                  <Lock className="h-5 w-5 shrink-0 text-muted-foreground pointer-events-none" strokeWidth={2} aria-hidden />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
@@ -188,14 +196,19 @@ export default function AuthPage() {
                     required
                     disabled={loading}
                     minLength={6}
-                    className="pl-12 pr-12 h-12 border-[hsl(var(--input-border))] focus:border-[hsl(var(--primary))] bg-background/50 backdrop-blur-sm"
+                    className={authInputField}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-card-foreground transition-colors"
+                    className="inline-flex shrink-0 items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-card-foreground"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" strokeWidth={2} aria-hidden />
+                    ) : (
+                      <Eye className="h-5 w-5" strokeWidth={2} aria-hidden />
+                    )}
                   </button>
                 </div>
               </div>
@@ -396,8 +409,8 @@ export default function AuthPage() {
                 <label htmlFor="recovery-email" className="text-sm font-medium">
                   Email
                 </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                <div className={authInputShell}>
+                  <Mail className="h-5 w-5 shrink-0 text-muted-foreground pointer-events-none" strokeWidth={2} aria-hidden />
                   <Input
                     id="recovery-email"
                     type="email"
@@ -406,7 +419,7 @@ export default function AuthPage() {
                     onChange={(e) => setRecoveryEmail(e.target.value)}
                     required
                     disabled={recoveryLoading}
-                    className="pl-10"
+                    className={authInputField}
                   />
                 </div>
               </div>

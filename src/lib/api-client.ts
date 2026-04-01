@@ -11,6 +11,19 @@ export interface ApiError {
   success?: boolean;
 }
 
+/** Usuario en JWT (validate-token) o respuesta de login */
+export interface SessionUserPayload {
+  id: string;
+  email: string;
+  name?: string;
+  role?: string;
+  phone?: string;
+  address?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface LoginResponse {
   user: {
     id: string;
@@ -417,6 +430,14 @@ class ApiClient {
     }
     
     return loginData;
+  }
+
+  /** Valida el token actual y devuelve el payload del usuario (p. ej. tras recargar la página). */
+  async validateToken(): Promise<{ user: SessionUserPayload }> {
+    const response = await this.request<ApiResponse<{ user: SessionUserPayload }>>("/auth/validate-token", {
+      method: "GET",
+    });
+    return response.data;
   }
 
   async register(data: {

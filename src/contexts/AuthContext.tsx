@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { apiClient, LoginResponse } from "@/lib/api-client";
+import { apiClient, LoginResponse, SessionUserPayload } from "@/lib/api-client";
 
 interface User {
   id: string;
@@ -10,6 +10,19 @@ interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+function sessionPayloadToUser(u: SessionUserPayload): User {
+  return {
+    id: String(u.id),
+    name: (u.name ?? "").trim(),
+    email: u.email,
+    phone: u.phone,
+    address: u.address,
+    isActive: u.isActive ?? true,
+    createdAt: u.createdAt ?? "",
+    updatedAt: u.updatedAt ?? "",
+  };
 }
 
 interface AuthContextType {
@@ -44,28 +57,45 @@ function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setToken(null);
     apiClient.setToken(null);
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem("auth_token");
   }, []);
 
   useEffect(() => {
-    // Check if user is already authenticated
-    const storedToken = localStorage.getItem('auth_token');
-    if (storedToken) {
-      apiClient.setToken(storedToken);
-      setToken(storedToken);
-      // Try to get user info from token (you might want to add a /auth/me endpoint)
-      // For now, we'll just set the token and let the app handle it
-    }
-    setLoading(false);
+    let cancelled = false;
 
-    // Listen for unauthorized events (token expired)
+    async function bootstrapSession() {
+      const storedToken = localStorage.getItem("auth_token");
+      if (!storedToken) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      apiClient.setToken(storedToken);
+      if (!cancelled) setToken(storedToken);
+
+      try {
+        const { user: raw } = await apiClient.validateToken();
+        if (cancelled) return;
+        setUser(sessionPayloadToUser(raw));
+      } catch {
+        if (!cancelled) {
+          logout();
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    bootstrapSession();
+
     const handleUnauthorized = () => {
       logout();
     };
 
-    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
     return () => {
-      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+      cancelled = true;
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };
   }, [logout]);
 
@@ -89,7 +119,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }) => {
     try {
       await apiClient.register(data);
-      // After registration, automatically log in
       await login(data.email, data.password);
     } catch (error) {
       throw error;
@@ -103,7 +132,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }) => {
     try {
       await apiClient.updateUser(data);
-      // Update local user state if name was updated
       if (data.name && user) {
         setUser({ ...user, name: data.name });
       }
@@ -139,4 +167,3 @@ function useAuth() {
 }
 
 export { AuthProvider, useAuth };
-

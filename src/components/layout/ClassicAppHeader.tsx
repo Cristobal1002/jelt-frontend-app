@@ -15,13 +15,10 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MoreVertical, PackagePlus, Plus, LogOut, LayoutTemplate, PanelTop } from "lucide-react";
 
-/** Demo: nombre fijo para presentación al cliente */
-const DISPLAY_USER_NAME = "Dra. Carmen Ruiz";
-
 export function ClassicAppHeader() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { layoutMode, setLayoutMode } = useLayoutMode();
   const { openAddProduct, openCreateOrder } = useDashboardDialogs();
 
@@ -38,8 +35,8 @@ export function ClassicAppHeader() {
     <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4">
       <p className="text-sm text-[hsl(var(--muted-foreground))] hidden sm:block">Panel de gestión</p>
       <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
-        <span className="text-sm font-medium text-[hsl(var(--foreground))] truncate max-w-[200px]">
-          {DISPLAY_USER_NAME}
+        <span className="text-sm font-medium text-[hsl(var(--foreground))] truncate max-w-[200px]" title={user?.email}>
+          {user?.name?.trim() || user?.email?.split("@")[0] || "Usuario"}
         </span>
         <ThemeToggle />
         <DropdownMenu>

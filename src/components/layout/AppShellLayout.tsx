@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { useLayoutMode } from "@/contexts/LayoutModeContext";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ClassicSidebar } from "./ClassicSidebar";
 import { ClassicAppHeader } from "./ClassicAppHeader";
 
@@ -20,5 +21,12 @@ export function AppShellLayout() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <div className="flex min-h-[100dvh] w-full flex-col bg-background">
+      <DashboardHeader />
+      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
+        <Outlet />
+      </main>
+    </div>
+  );
 }

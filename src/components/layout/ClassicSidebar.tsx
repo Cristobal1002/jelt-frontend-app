@@ -7,24 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useAuth } from "@/contexts/AuthContext";
 import { useLayoutMode } from "@/contexts/LayoutModeContext";
 import { useToast } from "@/hooks/use-toast";
-import {
-  LayoutDashboard,
-  ClipboardList,
-  FileSpreadsheet,
-  Package,
-  LineChart,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-
-const items = [
-  { to: "/", label: "Home", icon: LayoutDashboard, end: true },
-  { to: "/orders", label: "Órdenes", icon: ClipboardList },
-  { to: "/billing", label: "Facturación", icon: FileSpreadsheet },
-  { to: "/inventory", label: "Inventario", icon: Package },
-  { to: "/analysis", label: "Análisis", icon: LineChart },
-] as const;
+import { LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { mainNavItems } from "@/components/layout/mainNavItems";
 
 export function ClassicSidebar() {
   const navigate = useNavigate();
@@ -77,7 +61,7 @@ export function ClassicSidebar() {
         )}
         aria-label="Navegación principal"
       >
-        {items.map((item) => {
+        {mainNavItems.map((item) => {
           const { to, label, icon: Icon } = item;
           const end = "end" in item ? item.end : undefined;
           const linkClass = ({ isActive }: { isActive: boolean }) =>

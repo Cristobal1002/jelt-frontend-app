@@ -1,4 +1,3 @@
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { GlobalFilters } from "@/components/dashboard/GlobalFilters";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { ForecastChart } from "@/components/dashboard/ForecastChart";
@@ -29,8 +28,6 @@ export default function DashboardPage() {
           isClassic ? "min-h-full" : "min-h-screen ai-background",
         )}
       >
-        {!isClassic && <DashboardHeader />}
-
         <GlobalFilters />
 
         <KPICards />
