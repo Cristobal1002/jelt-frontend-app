@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/api-client";
-import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, TrendingUp, Zap, Brain, User } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, TrendingUp, Zap, Brain } from "lucide-react";
 import { JeltLogo } from "@/components/branding/JeltLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
@@ -21,13 +21,11 @@ const authInputField =
 export default function AuthPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login, register, isAuthenticated } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoveryLoading, setRecoveryLoading] = useState(false);
@@ -39,44 +37,6 @@ export default function AuthPage() {
       navigate("/");
     }
   }, [isAuthenticated, navigate]);
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!name.trim()) {
-      toast({
-        title: "Name required",
-        description: "Please enter your name.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await register({
-        name: name.trim(),
-        email,
-        password,
-      });
-
-      toast({
-        title: "Account created!",
-        description: "You have successfully signed in.",
-      });
-      
-      navigate("/");
-    } catch (error: any) {
-      toast({
-        title: "Sign up error",
-        description: error.message || "Failed to create account",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,9 +91,7 @@ export default function AuthPage() {
                 <h1 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-2">
                   Jelt Inventory
                 </h1>
-                <p className="text-sm text-muted-foreground">
-                  {isSignUp ? "Create your account to access" : "Intelligent Inventory Management"}
-                </p>
+                <p className="text-sm text-muted-foreground">Intelligent Inventory Management</p>
               </div>
 
               {/* AI Status Badge */}
@@ -146,26 +104,7 @@ export default function AuthPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5 relative z-10">
-              {/* Name Input - Only for Sign Up */}
-              {isSignUp && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-card-foreground">Name</label>
-                  <div className={authInputShell}>
-                    <User className="h-5 w-5 shrink-0 text-muted-foreground pointer-events-none" strokeWidth={2} aria-hidden />
-                    <Input
-                      type="text"
-                      placeholder="Your name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      disabled={loading}
-                      className={authInputField}
-                    />
-                  </div>
-                </div>
-              )}
-
+            <form onSubmit={handleSignIn} className="space-y-5 relative z-10">
               {/* Email Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-card-foreground">Email</label>
@@ -213,21 +152,18 @@ export default function AuthPage() {
                 </div>
               </div>
 
-              {/* Forgot Password Link - Only show on login */}
-              {!isSignUp && (
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    className="text-sm text-[hsl(var(--primary))] hover:text-[hsl(var(--primary-light))] transition-colors font-medium"
-                    onClick={() => {
-                      setShowRecoveryDialog(true);
-                      setRecoveryEmail(email); // Pre-fill with current email if any
-                    }}
-                  >
-                    Forgot your password?
-                  </button>
-                </div>
-              )}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="text-sm text-[hsl(var(--primary))] hover:text-[hsl(var(--primary-light))] transition-colors font-medium"
+                  onClick={() => {
+                    setShowRecoveryDialog(true);
+                    setRecoveryEmail(email);
+                  }}
+                >
+                  Forgot your password?
+                </button>
+              </div>
 
               {/* Submit Button */}
               <Button 
@@ -238,35 +174,16 @@ export default function AuthPage() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    {isSignUp ? "Creating account..." : "Signing in..."}
+                    Signing in...
                   </>
                 ) : (
                   <>
-                    {isSignUp ? "Create Account" : "Sign In"}
+                    Sign In
                     <Sparkles className="ml-2 h-4 w-4" />
                   </>
                 )}
               </Button>
             </form>
-
-            {/* Toggle between Login/Signup */}
-            <div className="text-center text-sm relative z-10 pt-4 border-t border-[hsl(var(--border))]">
-              <span className="text-muted-foreground">
-                {isSignUp ? "Already have an account? " : "Don't have an account? "}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setName("");
-                  setEmail("");
-                  setPassword("");
-                }}
-                className="text-[hsl(var(--primary))] font-semibold hover:text-[hsl(var(--primary-light))] transition-colors"
-              >
-                {isSignUp ? "Sign In" : "Sign Up"}
-              </button>
-            </div>
           </div>
         </div>
       </div>
