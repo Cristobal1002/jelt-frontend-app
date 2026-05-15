@@ -22,7 +22,7 @@ export function AppShellLayout() {
   }
 
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col bg-background">
+    <div className="flex h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-background">
       <DashboardHeader />
       <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
         <Outlet />
